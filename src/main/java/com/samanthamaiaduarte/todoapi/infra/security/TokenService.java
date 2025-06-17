@@ -4,6 +4,7 @@ import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.JWTCreationException;
 import com.auth0.jwt.exceptions.JWTVerificationException;
+import com.samanthamaiaduarte.todoapi.domain.user.LoginResponseDTO;
 import com.samanthamaiaduarte.todoapi.domain.user.User;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -17,17 +18,19 @@ public class TokenService {
     @Value("${api.security.token.secret}")
     private String secret;
 
-    public String generateToken(User user) {
+    public LoginResponseDTO generateToken(User user) {
 
         try {
             Algorithm algorithm = Algorithm.HMAC256(secret);
+            LocalDateTime refresh = LocalDateTime.now();
+
             String token = JWT.create()
                     .withIssuer("todoapi")
                     .withSubject(user.getLogin())
-                    .withExpiresAt(generateExpirationDate())
+                    .withExpiresAt(generateExpirationDate(refresh))
                     .sign(algorithm);
 
-            return token;
+            return new LoginResponseDTO(refresh, "bearer", token, 7200);
         } catch (JWTCreationException exception) {
             throw new RuntimeException("Error generating token: " + exception);
         }
@@ -46,7 +49,7 @@ public class TokenService {
         }
     }
 
-    private Instant generateExpirationDate() {
-        return LocalDateTime.now().plusHours(2).toInstant(ZoneOffset.of("-03:00"));
+    private Instant generateExpirationDate(LocalDateTime refresh) {
+        return refresh.plusHours(2).toInstant(ZoneOffset.of("-03:00"));
     }
 }
