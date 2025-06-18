@@ -3,14 +3,17 @@ package com.samanthamaiaduarte.todoapi.infra.exceptionhandler;
 import com.samanthamaiaduarte.todoapi.exception.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
 import java.time.LocalDateTime;
+import java.util.HashMap;
+import java.util.Map;
 
 @ControllerAdvice
-public class RestExceptionHandler extends ResponseEntityExceptionHandler {
+public class RestExceptionHandler {
 
     @ExceptionHandler(UserNotFoundException.class)
     public ResponseEntity<ExceptionHandlerDTO> userNotFoundHandler(UserNotFoundException exception) {
@@ -24,15 +27,13 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
     }
 
-    @ExceptionHandler(InvalidUsernameException.class)
-    public ResponseEntity<ExceptionHandlerDTO> invalidUsernameHandler(InvalidUsernameException exception) {
-        ExceptionHandlerDTO response = new ExceptionHandlerDTO(HttpStatus.BAD_REQUEST.value(), HttpStatus.BAD_REQUEST, LocalDateTime.now(), exception.getMessage());
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
-    }
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<ValidationHandlerDTO> validationHandler(MethodArgumentNotValidException exception) {
+        Map<String, String> errors = new HashMap<>();
 
-    @ExceptionHandler(InvalidPasswordException.class)
-    public ResponseEntity<ExceptionHandlerDTO> invalidPasswordHandler(InvalidPasswordException exception) {
-        ExceptionHandlerDTO response = new ExceptionHandlerDTO(HttpStatus.BAD_REQUEST.value(), HttpStatus.BAD_REQUEST, LocalDateTime.now(), exception.getMessage());
+        exception.getBindingResult().getFieldErrors().forEach( error -> errors.put(error.getField(), error.getDefaultMessage()) );
+
+        ValidationHandlerDTO response = new ValidationHandlerDTO(HttpStatus.BAD_REQUEST.value(), HttpStatus.BAD_REQUEST, LocalDateTime.now(), errors);
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
     }
 

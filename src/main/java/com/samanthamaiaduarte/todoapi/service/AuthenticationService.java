@@ -1,9 +1,6 @@
 package com.samanthamaiaduarte.todoapi.service;
 
-import com.samanthamaiaduarte.todoapi.domain.user.LoginResponseDTO;
-import com.samanthamaiaduarte.todoapi.domain.user.RegisterDTO;
-import com.samanthamaiaduarte.todoapi.domain.user.RegisterResponseDTO;
-import com.samanthamaiaduarte.todoapi.domain.user.User;
+import com.samanthamaiaduarte.todoapi.domain.user.*;
 import com.samanthamaiaduarte.todoapi.exception.InvalidPasswordException;
 import com.samanthamaiaduarte.todoapi.exception.InvalidUsernameException;
 import com.samanthamaiaduarte.todoapi.exception.UserAlreadyExistsException;
@@ -39,17 +36,12 @@ public class AuthenticationService {
         }
     }
 
-    public RegisterResponseDTO register(RegisterDTO data) {
-        if(data.login().isBlank() || data.login() == null) throw new InvalidUsernameException();
-        if(data.password().isBlank() || data.password() == null) throw new InvalidPasswordException();
-
+    public void register(RegisterDTO data, UserRole role) {
         if(this.repository.findByLogin(data.login()) != null) throw new UserAlreadyExistsException();
 
         String encryptedPassword = new BCryptPasswordEncoder().encode(data.password());
-        User newUser = new  User(data.login(), encryptedPassword, data.role());
+        User newUser = new  User(data.login(), encryptedPassword, role);
 
         this.repository.save(newUser);
-
-        return new RegisterResponseDTO(newUser.getLogin());
     }
 }
