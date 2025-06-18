@@ -1,6 +1,7 @@
 package com.samanthamaiaduarte.todoapi.controller;
 
-import com.samanthamaiaduarte.todoapi.domain.user.*;
+import com.samanthamaiaduarte.todoapi.domain.user.RegisterDTO;
+import com.samanthamaiaduarte.todoapi.domain.user.UserRole;
 import com.samanthamaiaduarte.todoapi.service.AuthenticationService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,20 +13,14 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/auth")
-public class AuthenticationController {
+@RequestMapping("/admin")
+public class AuthenticationAdminController {
     @Autowired
     private AuthenticationService authenticationService;
 
-    @PostMapping("/login")
-    public ResponseEntity<LoginResponseDTO> login(@Valid @RequestBody AuthenticationDTO data) {
-        LoginResponseDTO token = authenticationService.login(data.login(), data.password());
-        return ResponseEntity.ok(token);
-    }
-
     @PostMapping("/register")
     public ResponseEntity<?> register(@Valid @RequestBody RegisterDTO data) {
-        authenticationService.register(data, UserRole.USER);
+        authenticationService.register(data, UserRole.ADMIN);
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 }
