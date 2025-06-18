@@ -42,7 +42,7 @@ public class TokenService {
             return JWT.require(algorithm)
                     .withIssuer("todoapi")
                     .build()
-                    .verify(token)
+                    .verify(token.trim())
                     .getSubject();
         } catch (JWTVerificationException exception) {
             return "";
