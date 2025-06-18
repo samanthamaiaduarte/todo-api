@@ -1,8 +1,6 @@
 package com.samanthamaiaduarte.todoapi.service;
 
 import com.samanthamaiaduarte.todoapi.domain.user.*;
-import com.samanthamaiaduarte.todoapi.exception.InvalidPasswordException;
-import com.samanthamaiaduarte.todoapi.exception.InvalidUsernameException;
 import com.samanthamaiaduarte.todoapi.exception.UserAlreadyExistsException;
 import com.samanthamaiaduarte.todoapi.exception.UserNotFoundException;
 import com.samanthamaiaduarte.todoapi.infra.security.TokenService;
