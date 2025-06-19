@@ -26,7 +26,7 @@ public class AuthenticationService {
     public LoginResponseDTO login(String username, String password) {
         try {
             var usernamePassword = new UsernamePasswordAuthenticationToken(username, password);
-            var auth = this.authenticationManager.authenticate(usernamePassword);
+            var auth = authenticationManager.authenticate(usernamePassword);
 
             return tokenService.generateToken((User) auth.getPrincipal());
         } catch (InternalAuthenticationServiceException | BadCredentialsException exception) {
@@ -35,11 +35,11 @@ public class AuthenticationService {
     }
 
     public void register(RegisterDTO data, UserRole role) {
-        if(this.repository.findByLogin(data.login()) != null) throw new UserAlreadyExistsException();
+        if(repository.findByLogin(data.login()) != null) throw new UserAlreadyExistsException();
 
         String encryptedPassword = new BCryptPasswordEncoder().encode(data.password());
         User newUser = new  User(data.login(), encryptedPassword, role);
 
-        this.repository.save(newUser);
+        repository.save(newUser);
     }
 }
