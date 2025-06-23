@@ -17,10 +17,16 @@ import java.util.Map;
 @Order(Ordered.HIGHEST_PRECEDENCE)
 public class CustomExceptionHandler {
 
-    @ExceptionHandler({UserNotFoundException.class, TaskNotFoundException.class})
-    public ResponseEntity<ExceptionHandlerDTO> userNotFoundHandler(RuntimeException exception) {
+    @ExceptionHandler({TaskNotFoundException.class})
+    public ResponseEntity<ExceptionHandlerDTO> taskNotFoundHandler(RuntimeException exception) {
         ExceptionHandlerDTO response = new ExceptionHandlerDTO(HttpStatus.NOT_FOUND.value(), HttpStatus.NOT_FOUND, LocalDateTime.now(), exception.getMessage());
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+    }
+
+    @ExceptionHandler({UserNotFoundException.class})
+    public ResponseEntity<ExceptionHandlerDTO> userNotFoundHandler(RuntimeException exception) {
+        ExceptionHandlerDTO response = new ExceptionHandlerDTO(HttpStatus.UNAUTHORIZED.value(), HttpStatus.UNAUTHORIZED, LocalDateTime.now(), exception.getMessage());
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
     }
 
     @ExceptionHandler(UserAlreadyExistsException.class)
