@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
+import java.time.temporal.ChronoUnit;
 
 @Service
 public class TokenService {
@@ -22,7 +23,7 @@ public class TokenService {
 
         try {
             Algorithm algorithm = Algorithm.HMAC256(secret);
-            LocalDateTime refresh = LocalDateTime.now();
+            LocalDateTime refresh = LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS);
 
             String token = JWT.create()
                     .withIssuer("todoapi")
