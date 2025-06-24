@@ -1,12 +1,17 @@
 package com.samanthamaiaduarte.todoapi.infra.security;
 
+import com.samanthamaiaduarte.todoapi.exception.ApiTokenExpiredException;
+import com.samanthamaiaduarte.todoapi.exception.ApiTokenInvalidException;
+import com.samanthamaiaduarte.todoapi.infra.exceptionhandler.CustomAuthenticationEntryPoint;
 import com.samanthamaiaduarte.todoapi.repository.UserRepository;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.authentication.AuthenticationCredentialsNotFoundException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.authorization.AuthorizationDeniedException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
@@ -17,19 +22,28 @@ import java.io.IOException;
 @Component
 public class SecurityFilter extends OncePerRequestFilter {
     @Autowired
-    TokenService tokenService;
+    private TokenService tokenService;
     @Autowired
-    UserRepository userRepository;
+    private UserRepository userRepository;
+    @Autowired
+    private CustomAuthenticationEntryPoint entryPoint;
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
         var token = this.recoverToken(request);
         if(token != null) {
-            var login = tokenService.validateToken(token);
-            UserDetails user = userRepository.findByLogin(login);
+            try {
+                var login = tokenService.validateToken(token);
+                UserDetails user = userRepository.findByLogin(login);
 
-            var authentication = new UsernamePasswordAuthenticationToken(user, null, user.getAuthorities());
-            SecurityContextHolder.getContext().setAuthentication(authentication);
+                if (user == null) throw new ApiTokenInvalidException("User not found.");
+
+                var authentication = new UsernamePasswordAuthenticationToken(user, null, user.getAuthorities());
+                SecurityContextHolder.getContext().setAuthentication(authentication);
+
+            } catch (ApiTokenExpiredException | ApiTokenInvalidException exception) {
+                entryPoint.commence(request, response, exception);
+            }
         }
         filterChain.doFilter(request, response);
     }

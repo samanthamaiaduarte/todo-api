@@ -4,8 +4,13 @@ import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.JWTCreationException;
 import com.auth0.jwt.exceptions.JWTVerificationException;
+import com.auth0.jwt.exceptions.TokenExpiredException;
 import com.samanthamaiaduarte.todoapi.domain.user.LoginResponseDTO;
 import com.samanthamaiaduarte.todoapi.domain.user.User;
+import com.samanthamaiaduarte.todoapi.exception.ApiTokenCreationException;
+import com.samanthamaiaduarte.todoapi.exception.ApiTokenExpiredException;
+import com.samanthamaiaduarte.todoapi.exception.ApiTokenInvalidArgsException;
+import com.samanthamaiaduarte.todoapi.exception.ApiTokenInvalidException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -32,8 +37,12 @@ public class TokenService {
                     .sign(algorithm);
 
             return new LoginResponseDTO(refresh, "bearer", token, 7200);
-        } catch (JWTCreationException exception) {
-            throw new RuntimeException("Error generating token: " + exception);
+        }
+        catch (IllegalArgumentException exception) {
+            throw new ApiTokenInvalidArgsException("Invalid information: " + exception.getMessage());
+        }
+        catch (JWTCreationException exception) {
+            throw new ApiTokenCreationException("Error generating token: " + exception.getMessage());
         }
     }
 
@@ -45,8 +54,12 @@ public class TokenService {
                     .build()
                     .verify(token.trim())
                     .getSubject();
-        } catch (JWTVerificationException exception) {
-            return "";
+        }
+        catch (TokenExpiredException exception) {
+            throw new ApiTokenExpiredException("Token has expired at " + exception.getExpiredOn().truncatedTo(ChronoUnit.SECONDS));
+        }
+        catch (JWTVerificationException exception) {
+            throw new ApiTokenInvalidException("Invalid token.");
         }
     }
 
