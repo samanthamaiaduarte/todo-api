@@ -25,6 +25,14 @@ public class CustomExceptionHandler {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
     }
 
+    @ExceptionHandler(TaskForbiddenException.class)
+    public ResponseEntity<ExceptionHandlerDTO> taskForbiddenHandler(TaskForbiddenException exception) {
+        logger.warn("Task forbidden exception: {}", exception.getMessage());
+
+        ExceptionHandlerDTO response = new ExceptionHandlerDTO(HttpStatus.FORBIDDEN.value(), HttpStatus.FORBIDDEN, LocalDateTime.now(), exception.getMessage());
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(response);
+    }
+
     @ExceptionHandler(UserNotFoundException.class)
     public ResponseEntity<ExceptionHandlerDTO> userNotFoundHandler(UserNotFoundException exception) {
         logger.warn("User not found exception: {}", exception.getMessage());
