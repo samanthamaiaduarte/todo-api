@@ -30,21 +30,27 @@ public class SecurityFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
         var token = this.recoverToken(request);
-        if(token != null) {
-            try {
-                var login = tokenService.validateToken(token);
-                UserDetails user = userRepository.findByLogin(login);
+        try {
+            if (token != null) {
+                try {
+                    var login = tokenService.validateToken(token);
+                    UserDetails user = userRepository.findByLogin(login);
 
-                if (user == null) throw new ApiTokenInvalidException("User not found.");
+                    if (user == null) throw new ApiTokenInvalidException("User not found.");
 
-                var authentication = new UsernamePasswordAuthenticationToken(user, null, user.getAuthorities());
-                SecurityContextHolder.getContext().setAuthentication(authentication);
+                    var authentication = new UsernamePasswordAuthenticationToken(user, null, user.getAuthorities());
+                    SecurityContextHolder.getContext().setAuthentication(authentication);
 
-            } catch (ApiTokenExpiredException | ApiTokenInvalidException exception) {
-                entryPoint.commence(request, response, exception);
+                } catch (ApiTokenExpiredException | ApiTokenInvalidException exception) {
+                    entryPoint.commence(request, response, exception);
+                    return;
+                }
+            } else {
+                throw new ApiNoTokenException();
             }
-        } else {
-            entryPoint.commence(request, response, new ApiNoTokenException());
+        } catch(ApiNoTokenException exception) {
+            entryPoint.commence(request, response, exception);
+            return;
         }
         filterChain.doFilter(request, response);
     }
