@@ -38,5 +38,6 @@ public class CustomAccessDeniedHandler implements AccessDeniedHandler {
         response.setContentType(MediaType.APPLICATION_JSON_VALUE + ";charset=UTF-8");
 
         objectMapper.writeValue(response.getOutputStream(), responseBody);
+        response.flushBuffer();
     }
 }

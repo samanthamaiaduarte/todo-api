@@ -1,5 +1,6 @@
 package com.samanthamaiaduarte.todoapi.infra.security;
 
+import com.samanthamaiaduarte.todoapi.exception.ApiNoTokenException;
 import com.samanthamaiaduarte.todoapi.exception.ApiTokenExpiredException;
 import com.samanthamaiaduarte.todoapi.exception.ApiTokenInvalidException;
 import com.samanthamaiaduarte.todoapi.infra.exceptionhandler.CustomAuthenticationEntryPoint;
@@ -9,9 +10,7 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.authentication.AuthenticationCredentialsNotFoundException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.authorization.AuthorizationDeniedException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
@@ -44,6 +43,8 @@ public class SecurityFilter extends OncePerRequestFilter {
             } catch (ApiTokenExpiredException | ApiTokenInvalidException exception) {
                 entryPoint.commence(request, response, exception);
             }
+        } else {
+            entryPoint.commence(request, response, new ApiNoTokenException());
         }
         filterChain.doFilter(request, response);
     }
