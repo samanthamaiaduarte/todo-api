@@ -1,6 +1,5 @@
 package com.samanthamaiaduarte.todoapi.infra.security;
 
-import com.samanthamaiaduarte.todoapi.exception.ApiNoTokenException;
 import com.samanthamaiaduarte.todoapi.exception.ApiTokenExpiredException;
 import com.samanthamaiaduarte.todoapi.exception.ApiTokenInvalidException;
 import com.samanthamaiaduarte.todoapi.infra.exceptionhandler.CustomAuthenticationEntryPoint;
