@@ -159,6 +159,21 @@ class TaskControllerTest extends AbstractSecurityWebMvcTest {
     }
 
     @Test
+    @DisplayName("POST /tasks should return 415 when content type is not JSON")
+    void testTaskCreateUnsupported() throws Exception {
+        setSecurityContext(UserRole.ADMIN);
+
+        LocalDate created = LocalDate.now();
+        String invalidBody = "title=Task%201&description=Task%20test%201&dueDate=" + created.toString();
+
+        mockMvc.perform(post("/tasks")
+                        .header("Authorization", "Bearer admin-token")
+                        .contentType(MediaType.APPLICATION_FORM_URLENCODED)
+                        .content(invalidBody))
+                .andExpect(status().isUnsupportedMediaType());
+    }
+
+    @Test
     @DisplayName("PUT /tasks/{taskId} should return 200 when task is successfully updated")
     void testUpdateTaskSuccess() throws Exception {
         setSecurityContext(UserRole.ADMIN);
@@ -345,6 +360,22 @@ class TaskControllerTest extends AbstractSecurityWebMvcTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(data)))
                 .andExpect(status().isNotFound());
+    }
+
+    @Test
+    @DisplayName("PUT /tasks/{taskId} should return 415 when content type is not JSON")
+    void testTaskUpdateUnsupported() throws Exception {
+        setSecurityContext(UserRole.ADMIN);
+
+        UUID taskId = UUID.randomUUID();
+        LocalDate created = LocalDate.now();
+        String invalidBody = "title=Task%201&description=Task%20test%201&dueDate=" + created.toString();
+
+        mockMvc.perform(put("/tasks/{taskId}", taskId)
+                        .header("Authorization", "Bearer admin-token")
+                        .contentType(MediaType.APPLICATION_FORM_URLENCODED)
+                        .content(invalidBody))
+                .andExpect(status().isUnsupportedMediaType());
     }
 
     @Test
@@ -620,20 +651,21 @@ class TaskControllerTest extends AbstractSecurityWebMvcTest {
     void testTaskSelectListSuccess() throws Exception {
         setSecurityContext(UserRole.ADMIN);
 
+        Boolean completed = false;
         LocalDate created = LocalDate.now();
         List<TaskResponseDTO> listDTO = List.of(
-                new TaskResponseDTO(UUID.randomUUID(), "Test 1", "Task test 1", created, eq(false)),
-                new TaskResponseDTO(UUID.randomUUID(), "Test 2", "Task test 2", created.plusDays(1), false),
-                new TaskResponseDTO(UUID.randomUUID(), "Test 3", "Task test 3", created.minusDays(2), false)
+                new TaskResponseDTO(UUID.randomUUID(), "Test 1", "Task test 1", created, completed),
+                new TaskResponseDTO(UUID.randomUUID(), "Test 2", "Task test 2", created.plusDays(1), completed),
+                new TaskResponseDTO(UUID.randomUUID(), "Test 3", "Task test 3", created.minusDays(2), completed)
         );
 
-        when(taskService.selectTasks(any(User.class), eq(false))).thenReturn(listDTO);
+        when(taskService.selectTasks(any(User.class), eq(completed))).thenReturn(listDTO);
 
         mockMvc.perform(get("/tasks")
                         .header("Authorization", "Bearer admin-token"))
                 .andExpect(status().isOk());
 
-        verify(taskService).selectTasks(any(User.class), eq(false));
+        verify(taskService).selectTasks(any(User.class), eq(completed));
     }
 
     @Test
@@ -643,7 +675,7 @@ class TaskControllerTest extends AbstractSecurityWebMvcTest {
 
         doThrow(new ApiTokenInvalidException("Invalid token.")).when(tokenService).validateToken("invalid-token");
 
-        mockMvc.perform(get("/tasks", taskId)
+        mockMvc.perform(get("/tasks")
                         .header("Authorization", "Bearer invalid-token"))
                 .andExpect(status().isUnauthorized());
     }
@@ -674,20 +706,21 @@ class TaskControllerTest extends AbstractSecurityWebMvcTest {
     void testTaskCompleteSelectListSuccess() throws Exception {
         setSecurityContext(UserRole.ADMIN);
 
+        Boolean completed = true;
         LocalDate created = LocalDate.now();
         List<TaskResponseDTO> listDTO = List.of(
-                new TaskResponseDTO(UUID.randomUUID(), "Test 1", "Task test 1", created, eq(true)),
-                new TaskResponseDTO(UUID.randomUUID(), "Test 2", "Task test 2", created.plusDays(1), true),
-                new TaskResponseDTO(UUID.randomUUID(), "Test 3", "Task test 3", created.minusDays(2), true)
+                new TaskResponseDTO(UUID.randomUUID(), "Test 1", "Task test 1", created, completed),
+                new TaskResponseDTO(UUID.randomUUID(), "Test 2", "Task test 2", created.plusDays(1), completed),
+                new TaskResponseDTO(UUID.randomUUID(), "Test 3", "Task test 3", created.minusDays(2), completed)
         );
 
-        when(taskService.selectTasks(any(User.class), eq(true))).thenReturn(listDTO);
+        when(taskService.selectTasks(any(User.class), eq(completed))).thenReturn(listDTO);
 
         mockMvc.perform(get("/tasks/completed")
                         .header("Authorization", "Bearer admin-token"))
                 .andExpect(status().isOk());
 
-        verify(taskService).selectTasks(any(User.class), eq(true));
+        verify(taskService).selectTasks(any(User.class), eq(completed));
     }
 
     @Test
