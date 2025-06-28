@@ -41,21 +41,6 @@ class AuthenticationControllerTest extends AbstractSecurityWebMvcTest {
     }
 
     @Test
-    @DisplayName("POST /auth/login should return 401 when credentials are invalid")
-    void testLoginFailure() throws Exception {
-        AuthenticationDTO data = new AuthenticationDTO("usertest", "wrongpassword");
-
-        when(authenticationService.login(data.login(), data.password()))
-                .thenThrow(new UserNotFoundException());
-
-        mockMvc.perform(post("/auth/login")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(data)))
-                .andExpect(status().isUnauthorized())
-                .andExpect(jsonPath("$.errorMessage").value("User not found or wrong password."));
-    }
-
-    @Test
     @DisplayName("POST /auth/login should return 400 when login is blank")
     void testLoginFailure1() throws Exception {
         AuthenticationDTO data = new AuthenticationDTO("", "password");
@@ -80,17 +65,6 @@ class AuthenticationControllerTest extends AbstractSecurityWebMvcTest {
     }
 
     @Test
-    @DisplayName("POST /auth/login should return 415 when content type is not JSON")
-    void testLoginFailure3() throws Exception {
-        String invalidBody = "login=usertest&password=password";
-
-        mockMvc.perform(post("/auth/login")
-                        .contentType(MediaType.APPLICATION_FORM_URLENCODED)
-                        .content(invalidBody))
-                .andExpect(status().isUnsupportedMediaType());
-    }
-
-    @Test
     @DisplayName("POST /auth/login should return 400 when JSON is malformed")
     void testLoginFailure4() throws Exception {
         String malformedJson = "{\"login\": \"usertest\", \"password\": ";
@@ -99,6 +73,32 @@ class AuthenticationControllerTest extends AbstractSecurityWebMvcTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(malformedJson))
                 .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    @DisplayName("POST /auth/login should return 401 when credentials are invalid")
+    void testLoginFailure() throws Exception {
+        AuthenticationDTO data = new AuthenticationDTO("usertest", "wrongpassword");
+
+        when(authenticationService.login(data.login(), data.password()))
+                .thenThrow(new UserNotFoundException());
+
+        mockMvc.perform(post("/auth/login")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(data)))
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.errorMessage").value("User not found or wrong password."));
+    }
+
+    @Test
+    @DisplayName("POST /auth/login should return 415 when content type is not JSON")
+    void testLoginFailure3() throws Exception {
+        String invalidBody = "login=usertest&password=password";
+
+        mockMvc.perform(post("/auth/login")
+                        .contentType(MediaType.APPLICATION_FORM_URLENCODED)
+                        .content(invalidBody))
+                .andExpect(status().isUnsupportedMediaType());
     }
 
     @Test
@@ -115,21 +115,6 @@ class AuthenticationControllerTest extends AbstractSecurityWebMvcTest {
                 .andExpect(status().isCreated());
 
         verify(authenticationService, times(1)).register(data, role);
-    }
-
-    @Test
-    @DisplayName("POST /auth/register should return 409 when login already exists")
-    void testRegisterFailure() throws Exception {
-        RegisterDTO data = new RegisterDTO("usertest", "password");
-        UserRole role = UserRole.USER;
-
-        doThrow(new UserAlreadyExistsException()).when(authenticationService).register(data, role);
-
-        mockMvc.perform(post("/auth/register")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(data)))
-                .andExpect(status().isConflict())
-                .andExpect(jsonPath("$.errorMessage").value("User already exists."));
     }
 
     @Test
@@ -157,17 +142,6 @@ class AuthenticationControllerTest extends AbstractSecurityWebMvcTest {
     }
 
     @Test
-    @DisplayName("POST /auth/login should return 415 when content type is not JSON")
-    void testRegisterFailure3() throws Exception {
-        String invalidBody = "login=usertest&password=password";
-
-        mockMvc.perform(post("/auth/register")
-                        .contentType(MediaType.APPLICATION_FORM_URLENCODED)
-                        .content(invalidBody))
-                .andExpect(status().isUnsupportedMediaType());
-    }
-
-    @Test
     @DisplayName("POST /auth/login should return 400 when JSON is malformed")
     void testRegisterFailure4() throws Exception {
         String malformedJson = "{\"login\": \"usertest\", \"password\": ";
@@ -176,5 +150,31 @@ class AuthenticationControllerTest extends AbstractSecurityWebMvcTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(malformedJson))
                 .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    @DisplayName("POST /auth/register should return 409 when login already exists")
+    void testRegisterFailure() throws Exception {
+        RegisterDTO data = new RegisterDTO("usertest", "password");
+        UserRole role = UserRole.USER;
+
+        doThrow(new UserAlreadyExistsException()).when(authenticationService).register(data, role);
+
+        mockMvc.perform(post("/auth/register")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(data)))
+                .andExpect(status().isConflict())
+                .andExpect(jsonPath("$.errorMessage").value("User already exists."));
+    }
+
+    @Test
+    @DisplayName("POST /auth/login should return 415 when content type is not JSON")
+    void testRegisterFailure3() throws Exception {
+        String invalidBody = "login=usertest&password=password";
+
+        mockMvc.perform(post("/auth/register")
+                        .contentType(MediaType.APPLICATION_FORM_URLENCODED)
+                        .content(invalidBody))
+                .andExpect(status().isUnsupportedMediaType());
     }
 }
