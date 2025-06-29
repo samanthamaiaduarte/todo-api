@@ -59,11 +59,11 @@ UUID user_id FK
 }
 ```
 #### Package Structure
-├── controller
-├── domain
-├── exception
-├── infra
-├── repository
+├── controller<br/>
+├── domain<br/>
+├── exception<br/>
+├── infra<br/>
+├── repository<br/>
 └── service
 #### Authentication and Authorization
 - **Login** returns a JWT token valid for 2 hours
