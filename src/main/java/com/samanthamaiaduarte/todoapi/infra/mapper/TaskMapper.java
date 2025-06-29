@@ -1,4 +1,4 @@
-package com.samanthamaiaduarte.todoapi.mapper;
+package com.samanthamaiaduarte.todoapi.infra.mapper;
 
 import com.samanthamaiaduarte.todoapi.domain.task.Task;
 import com.samanthamaiaduarte.todoapi.domain.task.TaskRequestDTO;

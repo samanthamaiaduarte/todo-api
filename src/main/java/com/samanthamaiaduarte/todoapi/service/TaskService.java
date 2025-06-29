@@ -6,7 +6,7 @@ import com.samanthamaiaduarte.todoapi.domain.task.TaskResponseDTO;
 import com.samanthamaiaduarte.todoapi.domain.user.User;
 import com.samanthamaiaduarte.todoapi.exception.TaskForbiddenException;
 import com.samanthamaiaduarte.todoapi.exception.TaskNotFoundException;
-import com.samanthamaiaduarte.todoapi.mapper.TaskMapper;
+import com.samanthamaiaduarte.todoapi.infra.mapper.TaskMapper;
 import com.samanthamaiaduarte.todoapi.repository.TaskRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
